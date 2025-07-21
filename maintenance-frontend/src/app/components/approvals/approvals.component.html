@@ -1,0 +1,76 @@
+<div class="approvals">
+  <div class="approvals-header">
+    <h1>Pending Approvals</h1>
+    <p>Review and approve maintenance requests</p>
+  </div>
+
+  <div class="approvals-list">
+    <div class="approval-card card" *ngFor="let request of pendingApprovals">
+      <div class="card-header">
+        <div class="approval-header">
+          <div>
+            <h3>Request #{{ request.id }}: {{ request.title }}</h3>
+            <div class="approval-meta">
+              <span class="meta-item">{{ request.type.replace('_', ' ') }}</span>
+              <span [class]="getPriorityClass(request.priority)">{{ request.priority }}</span>
+              <span class="meta-item">{{ request.environment }}</span>
+              <span class="meta-item">by {{ request.submitter }}</span>
+              <span class="meta-item">{{ formatDate(request.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="approval-content">
+        <!-- Peer Review Status -->
+        <div class="peer-review-section" *ngIf="request.peerReviewer">
+          <div class="section-header">
+            <h4>Peer Review</h4>
+            <span [class]="getStatusClass(request.peerReviewStatus)">
+              {{ request.peerReviewStatus || 'PENDING' }}
+            </span>
+          </div>
+          <p class="peer-reviewer">Reviewed by: {{ request.peerReviewer }}</p>
+        </div>
+
+        <!-- Business Justification -->
+        <div class="justification-section">
+          <h4>Business Justification</h4>
+          <p>{{ request.businessJustification }}</p>
+        </div>
+
+        <!-- SQL Statement (if applicable) -->
+        <div class="sql-section" *ngIf="request.type === 'SQL_FIX' && request.sqlStatement">
+          <h4>SQL Statement</h4>
+          <pre class="sql-preview">{{ request.sqlStatement }}</pre>
+          <div class="sql-impact" *ngIf="request.affectedRows">
+            <span class="impact-label">Estimated Impact:</span>
+            <span class="impact-value">{{ request.affectedRows }} rows affected</span>
+          </div>
+        </div>
+
+        <!-- Approval Actions -->
+        <div class="approval-actions">
+          <button class="btn btn-success" (click)="approveRequest(request.id)">
+            ✓ Approve
+          </button>
+          <button class="btn btn-danger" (click)="rejectRequest(request.id)">
+            ✗ Reject
+          </button>
+          <button class="btn btn-secondary" (click)="requestMoreInfo(request.id)">
+            ? More Info
+          </button>
+          <a [routerLink]="['/requests', request.id]" class="btn btn-secondary">
+            View Details
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="pendingApprovals.length === 0">
+      <div class="empty-icon">📋</div>
+      <h3>No Pending Approvals</h3>
+      <p>All requests have been reviewed and processed.</p>
+    </div>
+  </div>
+</div>

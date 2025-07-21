@@ -1,0 +1,88 @@
+<div class="requests">
+  <div class="requests-header">
+    <div>
+      <h1>Maintenance Requests</h1>
+      <p>Manage and track all maintenance requests</p>
+    </div>
+    <a routerLink="/requests/new" class="btn btn-primary">
+      + New Request
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters card">
+    <div class="filter-group">
+      <label class="form-label">Status</label>
+      <select class="form-select" [(ngModel)]="selectedStatus" (change)="filterRequests()">
+        <option value="ALL">All Status</option>
+        <option value="DRAFT">Draft</option>
+        <option value="SUBMITTED">Submitted</option>
+        <option value="PENDING_APPROVAL">Pending Approval</option>
+        <option value="IN_PROGRESS">In Progress</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="REJECTED">Rejected</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="form-label">Type</label>
+      <select class="form-select" [(ngModel)]="selectedType" (change)="filterRequests()">
+        <option value="ALL">All Types</option>
+        <option value="SQL_FIX">SQL Fix</option>
+        <option value="CONFIG_UPDATE">Config Update</option>
+        <option value="JOB_CONTROL">Job Control</option>
+        <option value="LOG_ROTATION">Log Rotation</option>
+        <option value="JOB_TRIGGER">Job Trigger</option>
+        <option value="PATCH_DEPLOYMENT">Patch Deployment</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Requests Table -->
+  <div class="requests-table card">
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Submitter</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let request of filteredRequests">
+            <td>#{{ request.id }}</td>
+            <td>{{ request.title }}</td>
+            <td>{{ request.type.replace('_', ' ') }}</td>
+            <td>
+              <span [class]="getStatusClass(request.status)">
+                {{ request.status.replace('_', ' ') }}
+              </span>
+            </td>
+            <td>
+              <span [class]="getPriorityClass(request.priority)">
+                {{ request.priority }}
+              </span>
+            </td>
+            <td>{{ request.submitter }}</td>
+            <td>{{ formatDate(request.createdAt) }}</td>
+            <td>
+              <div class="action-buttons">
+                <a [routerLink]="['/requests', request.id]" class="btn btn-sm btn-secondary">
+                  View
+                </a>
+                <button *ngIf="request.status === 'DRAFT'" class="btn btn-sm btn-primary">
+                  Edit
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

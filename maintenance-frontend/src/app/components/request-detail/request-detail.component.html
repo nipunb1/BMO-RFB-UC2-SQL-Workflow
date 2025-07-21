@@ -1,0 +1,129 @@
+<div class="request-detail" *ngIf="request">
+  <div class="detail-header">
+    <div>
+      <h1>Request #{{ request.id }}: {{ request.title }}</h1>
+      <div class="header-meta">
+        <span [class]="getStatusClass(request.status)">{{ request.status.replace('_', ' ') }}</span>
+        <span [class]="getPriorityClass(request.priority)">{{ request.priority }}</span>
+        <span class="meta-item">{{ request.type.replace('_', ' ') }}</span>
+        <span class="meta-item">{{ request.environment }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-content">
+    <!-- Basic Information -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Request Information</h2>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Submitter</label>
+          <span>{{ request.submitter }}</span>
+        </div>
+        <div class="info-item">
+          <label>Application</label>
+          <span>{{ request.application }}</span>
+        </div>
+        <div class="info-item">
+          <label>Created</label>
+          <span>{{ formatDate(request.createdAt) }}</span>
+        </div>
+        <div class="info-item" *ngIf="request.peerReviewer">
+          <label>Peer Reviewer</label>
+          <span>{{ request.peerReviewer }}</span>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <label>Description</label>
+        <p>{{ request.description }}</p>
+      </div>
+    </div>
+
+    <!-- SQL Statement (if applicable) -->
+    <div class="card" *ngIf="request.type === 'SQL_FIX'">
+      <div class="card-header">
+        <h2 class="card-title">SQL Statement</h2>
+      </div>
+      
+      <div class="sql-content">
+        <pre class="sql-statement">{{ request.sqlStatement }}</pre>
+      </div>
+      
+      <div class="validation-result" *ngIf="request.validationResult">
+        <div class="validation-header">
+          <h3>Validation Result</h3>
+          <span class="validation-status valid">VALID</span>
+        </div>
+        
+        <div class="validation-grid">
+          <div class="validation-item">
+            <label>Statement Type</label>
+            <span>{{ request.validationResult.statementType }}</span>
+          </div>
+          <div class="validation-item">
+            <label>Affected Rows</label>
+            <span>{{ request.validationResult.affectedRows }}</span>
+          </div>
+          <div class="validation-item">
+            <label>Execution Time</label>
+            <span>{{ request.validationResult.estimatedExecutionTime }}s</span>
+          </div>
+          <div class="validation-item">
+            <label>Impact Level</label>
+            <span>{{ request.validationResult.impactLevel }}</span>
+          </div>
+          <div class="validation-item">
+            <label>Lock Duration</label>
+            <span>{{ request.validationResult.lockDuration }}</span>
+          </div>
+          <div class="validation-item">
+            <label>Affected Tables</label>
+            <span>{{ request.validationResult.affectedTables.join(', ') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Business Justification -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Business Justification &amp; Risk Management</h2>
+      </div>
+      
+      <div class="info-section">
+        <label>Business Justification</label>
+        <p>{{ request.businessJustification }}</p>
+      </div>
+      
+      <div class="info-section">
+        <label>Rollback Plan</label>
+        <p>{{ request.rollbackPlan }}</p>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Request Timeline</h2>
+      </div>
+      
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let item of timeline">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <h4>{{ item.action }}</h4>
+              <span class="timeline-time">{{ formatDate(item.timestamp) }}</span>
+            </div>
+            <p class="timeline-user">by {{ item.user }}</p>
+            <p class="timeline-details">{{ item.details }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

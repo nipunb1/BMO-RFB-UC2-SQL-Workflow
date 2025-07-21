@@ -1,0 +1,160 @@
+<div class="request-form">
+  <div class="form-header">
+    <h1>New Maintenance Request</h1>
+    <p>Submit a new maintenance request for review and approval</p>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" #requestForm="ngForm">
+    <!-- Basic Information -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Basic Information</h2>
+      </div>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Request Title *</label>
+          <input type="text" class="form-input" [(ngModel)]="request.title" name="title" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Request Type *</label>
+          <select class="form-select" [(ngModel)]="request.type" name="type" (change)="onTypeChange()" required>
+            <option value="SQL_FIX">SQL Fix</option>
+            <option value="CONFIG_UPDATE">Config Update</option>
+            <option value="JOB_CONTROL">Job Control</option>
+            <option value="LOG_ROTATION">Log Rotation</option>
+            <option value="JOB_TRIGGER">Job Trigger</option>
+            <option value="PATCH_DEPLOYMENT">Patch Deployment</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Priority *</label>
+          <select class="form-select" [(ngModel)]="request.priority" name="priority" required>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Environment *</label>
+          <select class="form-select" [(ngModel)]="request.environment" name="environment" required>
+            <option value="DEVELOPMENT">Development</option>
+            <option value="STAGING">Staging</option>
+            <option value="PRODUCTION">Production</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Application *</label>
+          <input type="text" class="form-input" [(ngModel)]="request.application" name="application" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Peer Reviewer</label>
+          <input type="text" class="form-input" [(ngModel)]="request.peerReviewer" name="peerReviewer" placeholder="Optional peer reviewer">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <textarea class="form-textarea" [(ngModel)]="request.description" name="description" rows="4" required></textarea>
+      </div>
+    </div>
+
+    <!-- Type-specific Content -->
+    <div class="card" *ngIf="request.type === 'SQL_FIX'">
+      <div class="card-header">
+        <h2 class="card-title">SQL Statement</h2>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">SQL Statement *</label>
+        <textarea class="form-textarea sql-editor" [(ngModel)]="request.sqlStatement" name="sqlStatement" rows="8" required></textarea>
+      </div>
+      
+      <div class="validation-section">
+        <button type="button" class="btn btn-secondary" (click)="validateSql()" [disabled]="isValidating || !request.sqlStatement.trim()">
+          <span *ngIf="isValidating">Validating...</span>
+          <span *ngIf="!isValidating">Validate SQL</span>
+        </button>
+        
+        <div *ngIf="showValidation && validationResult" class="validation-result">
+          <div class="validation-header" [class.valid]="validationResult.isValid" [class.invalid]="!validationResult.isValid">
+            <h3>Validation Result</h3>
+            <span class="validation-status">{{ validationResult.isValid ? 'VALID' : 'INVALID' }}</span>
+          </div>
+          
+          <div class="validation-details">
+            <div class="detail-item">
+              <strong>Statement Type:</strong> {{ validationResult.statementType }}
+            </div>
+            <div class="detail-item">
+              <strong>Affected Rows:</strong> {{ validationResult.affectedRows }}
+            </div>
+            <div class="detail-item">
+              <strong>Execution Time:</strong> {{ validationResult.estimatedExecutionTime }}s
+            </div>
+            <div class="detail-item">
+              <strong>Impact Level:</strong> {{ validationResult.impactLevel }}
+            </div>
+            <div class="detail-item">
+              <strong>Lock Duration:</strong> {{ validationResult.lockDuration }}
+            </div>
+            <div class="detail-item">
+              <strong>Affected Tables:</strong> {{ validationResult.affectedTables.join(', ') }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" *ngIf="request.type === 'CONFIG_UPDATE'">
+      <div class="card-header">
+        <h2 class="card-title">Configuration Content</h2>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Configuration Changes *</label>
+        <textarea class="form-textarea" [(ngModel)]="request.configContent" name="configContent" rows="8" required></textarea>
+      </div>
+    </div>
+
+    <div class="card" *ngIf="request.type === 'JOB_CONTROL' || request.type === 'JOB_TRIGGER'">
+      <div class="card-header">
+        <h2 class="card-title">Job Details</h2>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Job Configuration *</label>
+        <textarea class="form-textarea" [(ngModel)]="request.jobDetails" name="jobDetails" rows="6" required></textarea>
+      </div>
+    </div>
+
+    <!-- Business Justification -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Business Justification &amp; Risk Management</h2>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Business Justification *</label>
+        <textarea class="form-textarea" [(ngModel)]="request.businessJustification" name="businessJustification" rows="4" required></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Rollback Plan *</label>
+        <textarea class="form-textarea" [(ngModel)]="request.rollbackPlan" name="rollbackPlan" rows="4" required></textarea>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onSaveDraft()">Save Draft</button>
+      <button type="submit" class="btn btn-primary" [disabled]="!requestForm.form.valid">Submit Request</button>
+    </div>
+  </form>
+</div>
